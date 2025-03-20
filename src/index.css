@@ -1,0 +1,185 @@
+@import "tailwindcss";
+
+/**
+ * Base styles
+ */
+:root {
+  /* Typography */
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  
+  /* Theme colors - light mode */
+  --background-color: #ffffff;
+  --text-color: #213547;
+  
+  /* Card and containers */
+  --card-bg: #ffffff;
+  --card-bg-alt: #f9fafb;
+  
+  /* Primary colors */
+  --primary-color: #0284c7;
+  --primary-hover: #0369a1;
+  --primary-light: #38bdf8;
+  
+  /* Text variations */
+  --heading-color: #0369a1;
+  
+  /* Code blocks */
+  --code-bg: #e5e7eb;
+  --code-color: #1f2937;
+  
+  /* Apply base colors */
+  color-scheme: light;
+  color: var(--text-color);
+  background-color: var(--background-color);
+}
+
+/**
+ * Dark mode theme
+ */
+.dark {
+  /* Theme colors - dark mode */
+  --background-color: #242424;
+  --text-color: rgba(255, 255, 255, 0.87);
+  
+  /* Card and containers */
+  --card-bg: #1f2937;
+  --card-bg-alt: #374151;
+  
+  /* Primary colors */
+  --primary-color: #0284c7;
+  --primary-hover: #0ea5e9;
+  --primary-light: #38bdf8;
+  
+  /* Text variations */
+  --heading-color: #38bdf8;
+  
+  /* Code blocks */
+  --code-bg: #4b5563;
+  --code-color: #f3f4f6;
+  
+  /* Apply base colors */
+  color-scheme: dark;
+  color: var(--text-color);
+  background-color: var(--background-color);
+}
+
+/**
+ * Element styles
+ */
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+
+a:hover {
+  color: #535bf2;
+}
+
+button {
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+code {
+  background-color: var(--code-bg);
+  color: var(--code-color);
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.875rem;
+  transition: all 0.15s ease-in-out;
+}
+
+/**
+ * Tailwind override styles
+ */
+.dark .bg-white {
+  background-color: var(--card-bg) !important;
+}
+
+.dark .bg-gray-50 {
+  background-color: var(--card-bg-alt) !important;
+}
+
+.dark .bg-gray-100 {
+  background-color: #333333 !important;
+}
+
+.dark .dark\:bg-gray-600 {
+  background-color: var(--code-bg) !important;
+}
+
+.dark .dark\:bg-gray-700 {
+  background-color: var(--card-bg-alt) !important;
+}
+
+.dark .dark\:bg-gray-800 {
+  background-color: var(--card-bg) !important;
+}
+
+.dark .dark\:text-white {
+  color: #ffffff !important;
+}
+
+.dark .dark\:text-gray-100 {
+  color: var(--code-color) !important;
+}
+
+.dark .dark\:text-gray-200 {
+  color: #e5e7eb !important;
+}
+
+.dark .dark\:text-gray-300 {
+  color: #d1d5db !important;
+}
+
+.dark .dark\:text-gray-400 {
+  color: #9ca3af !important;
+}
+
+.dark .dark\:text-primary-400 {
+  color: var(--primary-light) !important;
+}
+
+.bg-primary-600 {
+  background-color: var(--primary-color) !important;
+}
+
+.text-white {
+  color: white !important;
+}
+
+.hover\:bg-primary-700:hover {
+  background-color: var(--primary-hover) !important;
+}
+
+/**
+ * Transitions
+ */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
