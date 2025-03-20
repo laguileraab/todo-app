@@ -163,11 +163,8 @@ The order is persisted in the database using a `position` column, ensuring your 
 If you're experiencing issues with drag and drop:
 
 1. Make sure the `position` column exists in your todos table
-   - Run the SQL from `db/scripts/add-position-column.sql`
-   - Or use `npm run db:add-position` to get the SQL
-
-2. Check the browser console for any errors
-   - Look for messages related to the `position` column
+   - Run the comprehensive setup SQL from `db/scripts/create-database.sql`
+   - Or use `npm run setup-db` to set up the database with all required columns and features
 
 ## License
 

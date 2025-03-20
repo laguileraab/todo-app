@@ -9,10 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "setup-db": "node setup-db.js",
-    "db:setup": "node setup-db.js",
-    "db:add-position": "echo 'Copy the SQL from db/scripts/add-position-column.sql and run it in the Supabase SQL Editor'",
-    "db:enable-realtime": "echo 'Copy the SQL from db/scripts/enable-realtime.sql and run it in the Supabase SQL Editor'",
-    "db:fix-position": "node db/scripts/fix-position-column.js"
+    "db:setup": "node setup-db.js"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
