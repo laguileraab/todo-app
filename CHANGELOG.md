@@ -27,6 +27,10 @@ All notable changes to this project will be documented in this file.
 - Improved cursor feedback with proper grab/grabbing states following UI/UX best practices
 - Simplified database scripts by removing redundant files and using a single comprehensive script
 - Improved authentication UX with automatic redirect to dashboard after login/signup
+- Improved navigation button visibility and contrast in both scrolled and non-scrolled states
+- Added smooth transition animations for navigation button interactions
+- Fixed My Todos and Profile navigation functionality with proper URL hash updates
+- Enhanced button states and feedback in both light and dark modes
 
 ### Fixed
 - Implemented fully functional mobile menu with toggle functionality
@@ -141,20 +145,4 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - Added real-time capabilities for the todos table
-- Added `enable-realtime.sql` script for manual real-time enablement
-- Added npm script `enable-realtime` for guiding users on real-time setup
-
-### Changed
-- Improved Supabase client configuration with proper real-time settings
-- Enhanced `useTodos` hook with user-specific real-time subscriptions
-- Optimized React performance using `useCallback` for memoization
-
-### Fixed
-- Resolved real-time update issues with todos not reflecting changes immediately
-- Fixed subscription management with proper lifecycle handling
-- Improved error handling and debugging for Supabase connections
-
-## [0.1.0] - 2023-06-10
-
-### Added
-- Created `setup-db.js`
+- Added `enable-realtime.sql`

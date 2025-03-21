@@ -16,7 +16,10 @@ interface NavLinkProps {
 const NavLink = memo(({ href, children, isButton, onClick, isScrolled = false }: NavLinkProps) => (
   <a
     href={href}
-    onClick={onClick}
+    onClick={(e) => {
+      e.preventDefault();
+      onClick?.();
+    }}
     className={cn(
       "px-4 py-2 rounded-md text-sm font-medium",
       "transition-all duration-300 ease-in-out",
@@ -31,10 +34,14 @@ const NavLink = memo(({ href, children, isButton, onClick, isScrolled = false }:
             "active:from-primary-700 active:to-primary-800"
           )
         : cn(
-            "text-gray-700 dark:text-gray-300",
-            "hover:text-primary-600 dark:hover:text-primary-400",
-            "hover:bg-gray-100 dark:hover:bg-gray-800/50",
-            isScrolled ? "text-white hover:text-white hover:bg-white/10" : ""
+            isScrolled 
+              ? "text-white hover:text-white hover:bg-white/10" 
+              : cn(
+                  "text-gray-800 dark:text-gray-200",
+                  "hover:text-primary-600 dark:hover:text-primary-400",
+                  "hover:bg-gray-100 dark:hover:bg-gray-800/50",
+                  "active:bg-gray-200 dark:active:bg-gray-700/50"
+                )
           )
     )}
   >
@@ -78,6 +85,11 @@ const Navigation = ({ setActivePage, onShowChangelog }: NavigationProps) => {
 
   // Memoize navigation handlers
   const handleNavLinkClick = useCallback((page: string) => {
+    if (page === 'todos') {
+      window.location.hash = '#todos';
+    } else if (page === 'profile') {
+      window.location.hash = '#profile';
+    }
     setActivePage(page);
     setMobileMenuOpen(false);
   }, [setActivePage]);
