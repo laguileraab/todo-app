@@ -9,20 +9,33 @@ interface NavLinkProps {
   children: React.ReactNode;
   isButton?: boolean;
   onClick?: () => void;
+  isScrolled?: boolean;
 }
 
 // Memoize NavLink component
-const NavLink = memo(({ href, children, isButton, onClick }: NavLinkProps) => (
+const NavLink = memo(({ href, children, isButton, onClick, isScrolled = false }: NavLinkProps) => (
   <a
     href={href}
     onClick={onClick}
     className={cn(
-      "px-3 py-2 rounded-md text-sm font-medium",
+      "px-4 py-2 rounded-md text-sm font-medium",
       "transition-all duration-300 ease-in-out",
-      "transform hover:scale-105",
+      "transform hover:scale-105 active:scale-95",
       isButton
-        ? "bg-primary-500 text-white hover:bg-primary-600 hover:shadow-lg"
-        : "text-gray-700 dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400 hover:bg-gray-100/10"
+        ? cn(
+            "bg-gradient-to-r from-primary-500 to-primary-600 dark:from-primary-600 dark:to-primary-700",
+            "text-white shadow-md",
+            "hover:shadow-lg hover:from-primary-600 hover:to-primary-700",
+            "dark:hover:from-primary-500 dark:hover:to-primary-600",
+            "border border-primary-400 dark:border-primary-500",
+            "active:from-primary-700 active:to-primary-800"
+          )
+        : cn(
+            "text-gray-700 dark:text-gray-300",
+            "hover:text-primary-600 dark:hover:text-primary-400",
+            "hover:bg-gray-100 dark:hover:bg-gray-800/50",
+            isScrolled ? "text-white hover:text-white hover:bg-white/10" : ""
+          )
     )}
   >
     {children}
@@ -133,16 +146,16 @@ const Navigation = ({ setActivePage, onShowChangelog }: NavigationProps) => {
               </a>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <NavLink href="#features" onClick={() => handleNavLinkClick('features')}>
+              <NavLink href="#features" onClick={() => handleNavLinkClick('features')} isScrolled={isScrolled}>
                 Features
               </NavLink>
-              <NavLink href="#pricing" onClick={() => handleNavLinkClick('pricing')}>
+              <NavLink href="#pricing" onClick={() => handleNavLinkClick('pricing')} isScrolled={isScrolled}>
                 Pricing
               </NavLink>
-              <NavLink href="#about" onClick={() => handleNavLinkClick('about')}>
+              <NavLink href="#about" onClick={() => handleNavLinkClick('about')} isScrolled={isScrolled}>
                 About Us
               </NavLink>
-              <NavLink href="#changelog" onClick={onShowChangelog}>
+              <NavLink href="#changelog" onClick={onShowChangelog} isScrolled={isScrolled}>
                 Changelog
               </NavLink>
             </div>
@@ -153,18 +166,18 @@ const Navigation = ({ setActivePage, onShowChangelog }: NavigationProps) => {
             </div>
             {user ? (
               <>
-                <NavLink href="#todos" onClick={() => handleNavLinkClick('todos')}>
+                <NavLink href="#todos" onClick={() => handleNavLinkClick('todos')} isScrolled={isScrolled}>
                   My Todos
                 </NavLink>
-                <NavLink href="#profile" onClick={() => handleNavLinkClick('profile')}>
+                <NavLink href="#profile" onClick={() => handleNavLinkClick('profile')} isScrolled={isScrolled}>
                   Profile
                 </NavLink>
-                <NavLink href="#" onClick={handleSignOut} isButton>
+                <NavLink href="#" onClick={handleSignOut} isButton isScrolled={isScrolled}>
                   Sign Out
                 </NavLink>
               </>
             ) : (
-              <NavLink href="#auth" onClick={() => handleNavLinkClick('auth')} isButton>
+              <NavLink href="#auth" onClick={() => handleNavLinkClick('auth')} isButton isScrolled={isScrolled}>
                 Sign In
               </NavLink>
             )}
@@ -204,35 +217,35 @@ const Navigation = ({ setActivePage, onShowChangelog }: NavigationProps) => {
           "dark:from-primary-900/95 dark:to-purple-900/95",
           "backdrop-blur-sm shadow-lg"
         )}>
-          <NavLink href="#features" onClick={() => handleNavLinkClick('features')}>
+          <NavLink href="#features" onClick={() => handleNavLinkClick('features')} isScrolled={isScrolled}>
             Features
           </NavLink>
-          <NavLink href="#pricing" onClick={() => handleNavLinkClick('pricing')}>
+          <NavLink href="#pricing" onClick={() => handleNavLinkClick('pricing')} isScrolled={isScrolled}>
             Pricing
           </NavLink>
-          <NavLink href="#about" onClick={() => handleNavLinkClick('about')}>
+          <NavLink href="#about" onClick={() => handleNavLinkClick('about')} isScrolled={isScrolled}>
             About Us
           </NavLink>
           <NavLink href="#changelog" onClick={() => {
             onShowChangelog();
             setMobileMenuOpen(false);
-          }}>
+          }} isScrolled={isScrolled}>
             Changelog
           </NavLink>
           {user ? (
             <>
-              <NavLink href="#todos" onClick={() => handleNavLinkClick('todos')}>
+              <NavLink href="#todos" onClick={() => handleNavLinkClick('todos')} isScrolled={isScrolled}>
                 My Todos
               </NavLink>
-              <NavLink href="#profile" onClick={() => handleNavLinkClick('profile')}>
+              <NavLink href="#profile" onClick={() => handleNavLinkClick('profile')} isScrolled={isScrolled}>
                 Profile
               </NavLink>
-              <NavLink href="#" onClick={handleSignOut} isButton>
+              <NavLink href="#" onClick={handleSignOut} isButton isScrolled={isScrolled}>
                 Sign Out
               </NavLink>
             </>
           ) : (
-            <NavLink href="#auth" onClick={() => handleNavLinkClick('auth')} isButton>
+            <NavLink href="#auth" onClick={() => handleNavLinkClick('auth')} isButton isScrolled={isScrolled}>
               Sign In
             </NavLink>
           )}
