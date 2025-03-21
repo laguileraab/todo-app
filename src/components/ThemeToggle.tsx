@@ -52,7 +52,7 @@ export default function ThemeToggle() {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={cn(
-        "fixed top-4 right-4 p-2 rounded-full transition-all duration-200 z-50",
+        "p-2 rounded-full transition-all duration-200",
         "bg-gray-200 dark:bg-gray-800",
         isHovered && "scale-110"
       )}
@@ -61,7 +61,7 @@ export default function ThemeToggle() {
       {theme === 'light' ? (
         <svg 
           xmlns="http://www.w3.org/2000/svg" 
-          className="h-6 w-6 text-gray-800" 
+          className="h-5 w-5 text-gray-800" 
           fill="none" 
           viewBox="0 0 24 24" 
           stroke="currentColor"
@@ -77,7 +77,7 @@ export default function ThemeToggle() {
       ) : (
         <svg 
           xmlns="http://www.w3.org/2000/svg" 
-          className="h-6 w-6 text-yellow-300" 
+          className="h-5 w-5 text-yellow-300" 
           fill="none" 
           viewBox="0 0 24 24" 
           stroke="currentColor"

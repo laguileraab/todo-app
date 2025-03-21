@@ -48,3 +48,5 @@ supabase-diagnostic.html
 
 # Misc
 .netlify
+
+.vercel

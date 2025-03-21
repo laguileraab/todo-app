@@ -4,7 +4,12 @@ import { cn } from '../utils/cn';
 
 type FormState = 'LOGIN' | 'SIGNUP' | 'FORGOT_PASSWORD';
 
-export default function AuthForm() {
+interface AuthFormProps {
+  onLoginSuccess?: () => void;
+  onSignupSuccess?: () => void;
+}
+
+export default function AuthForm({ onLoginSuccess, onSignupSuccess }: AuthFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [formState, setFormState] = useState<FormState>('LOGIN');
@@ -44,6 +49,14 @@ export default function AuthForm() {
         }
         
         setMessage({ text: 'Logged in successfully!', type: 'success' });
+        
+        // Call the onLoginSuccess callback to redirect the user
+        if (onLoginSuccess) {
+          // Short delay to show the success message before redirecting
+          setTimeout(() => {
+            onLoginSuccess();
+          }, 500);
+        }
       } else if (formState === 'SIGNUP') {
         // Direct API call to signup
         console.log('Attempting signup with direct API call...');
@@ -100,10 +113,35 @@ export default function AuthForm() {
           throw error;
         }
         
-        setMessage({ 
-          text: 'Registration successful! Check your email for confirmation.',
-          type: 'success'
-        });
+        // For auto-login after signup
+        if (data.user && !data.user.identities?.some(identity => identity?.identity_data?.email_verified === 'false')) {
+          // Email is already verified or email verification is not required
+          setMessage({ 
+            text: 'Registration successful! Logging you in...',
+            type: 'success'
+          });
+          
+          // Auto-login the user
+          const { error: loginError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+          
+          if (loginError) {
+            console.error('Auto-login after signup error:', loginError);
+          } else if (onSignupSuccess) {
+            // Short delay to show the success message before redirecting
+            setTimeout(() => {
+              onSignupSuccess();
+            }, 500);
+          }
+        } else {
+          // Email verification is required
+          setMessage({ 
+            text: 'Registration successful! Check your email for confirmation.',
+            type: 'success'
+          });
+        }
       } else if (formState === 'FORGOT_PASSWORD') {
         // Direct API call for password reset
         console.log('Attempting password reset with direct API call...');
@@ -133,31 +171,25 @@ export default function AuthForm() {
   };
 
   return (
-    <div className="w-full max-w-md">
-      <h2 className="text-2xl font-bold mb-6 text-center">
-        {formState === 'LOGIN' ? 'Login' : 
-         formState === 'SIGNUP' ? 'Sign Up' : 
-         'Reset Password'}
-      </h2>
-      
+    <div className="w-full">
       {message && (
         <div className={cn(
-          "mb-4 p-3 rounded-md",
+          "mb-6 p-4 rounded-md text-sm",
           message.type === 'error' 
-            ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200"
-            : "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200"
+            ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-200"
+            : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-200"
         )}>
           <p>{message.text}</p>
         </div>
       )}
       
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label 
             htmlFor="email" 
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
           >
-            Email
+            Email Address
           </label>
           <input
             id="email"
@@ -166,12 +198,15 @@ export default function AuthForm() {
             onChange={(e) => setEmail(e.target.value)}
             required
             className={cn(
-              "w-full px-3 py-2 border rounded-md",
-              "border-gray-300 dark:border-gray-700",
-              "bg-white dark:bg-gray-800",
+              "w-full px-4 py-3 border rounded-lg",
+              "border-gray-300 dark:border-gray-600",
+              "bg-white dark:bg-gray-700",
               "text-gray-900 dark:text-gray-100",
-              "focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              "placeholder-gray-400 dark:placeholder-gray-500",
+              "focus:ring-2 focus:ring-primary-500 focus:border-transparent",
+              "transition-colors duration-200"
             )}
+            placeholder="your.email@example.com"
           />
         </div>
         
@@ -179,7 +214,7 @@ export default function AuthForm() {
           <div>
             <label 
               htmlFor="password" 
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
             >
               Password
             </label>
@@ -190,12 +225,15 @@ export default function AuthForm() {
               onChange={(e) => setPassword(e.target.value)}
               required
               className={cn(
-                "w-full px-3 py-2 border rounded-md",
-                "border-gray-300 dark:border-gray-700",
-                "bg-white dark:bg-gray-800",
+                "w-full px-4 py-3 border rounded-lg",
+                "border-gray-300 dark:border-gray-600",
+                "bg-white dark:bg-gray-700",
                 "text-gray-900 dark:text-gray-100",
-                "focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                "placeholder-gray-400 dark:placeholder-gray-500",
+                "focus:ring-2 focus:ring-primary-500 focus:border-transparent",
+                "transition-colors duration-200"
               )}
+              placeholder={formState === 'SIGNUP' ? 'Create a password' : 'Enter your password'}
             />
           </div>
         )}
@@ -204,20 +242,26 @@ export default function AuthForm() {
           type="submit"
           disabled={loading}
           className={cn(
-            "w-full px-4 py-2 text-sm font-medium rounded-md",
-            "bg-blue-600 hover:bg-blue-700",
+            "w-full px-4 py-3 font-medium rounded-lg",
+            "bg-primary-600 hover:bg-primary-700",
             "text-white",
             "transition-colors duration-200",
-            "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+            "focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2",
             loading && "opacity-70 cursor-not-allowed"
           )}
         >
           {loading ? (
-            <span>Loading...</span>
+            <div className="flex items-center justify-center">
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Processing...
+            </div>
           ) : (
             <span>
               {formState === 'LOGIN' ? 'Sign In' : 
-               formState === 'SIGNUP' ? 'Sign Up' : 
+               formState === 'SIGNUP' ? 'Create Account' : 
                'Send Reset Link'}
             </span>
           )}
@@ -225,7 +269,7 @@ export default function AuthForm() {
       </form>
 
       {debugInfo && (
-        <div className="mt-4 p-3 text-xs bg-gray-100 dark:bg-gray-800 rounded-md">
+        <div className="mt-6 p-3 text-xs bg-gray-100 dark:bg-gray-800 rounded-md">
           <details>
             <summary className="font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
               Debug Information
@@ -237,22 +281,22 @@ export default function AuthForm() {
         </div>
       )}
       
-      <div className="mt-4 text-center">
+      <div className="mt-6 text-center">
         {formState === 'LOGIN' ? (
           <>
             <button
               type="button"
               onClick={() => setFormState('FORGOT_PASSWORD')}
-              className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+              className="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
             >
               Forgot password?
             </button>
-            <div className="mt-2">
-              <span className="text-gray-600 dark:text-gray-400">Don't have an account? </span>
+            <div className="mt-4">
+              <span className="text-sm text-gray-600 dark:text-gray-400">Don't have an account? </span>
               <button
                 type="button"
                 onClick={() => setFormState('SIGNUP')}
-                className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                className="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium"
               >
                 Sign up
               </button>
@@ -260,24 +304,32 @@ export default function AuthForm() {
           </>
         ) : formState === 'SIGNUP' ? (
           <div>
-            <span className="text-gray-600 dark:text-gray-400">Already have an account? </span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">Already have an account? </span>
             <button
               type="button"
               onClick={() => setFormState('LOGIN')}
-              className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+              className="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium"
             >
-              Log in
+              Sign in
             </button>
           </div>
         ) : (
-          <button
-            type="button"
-            onClick={() => setFormState('LOGIN')}
-            className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-          >
-            Back to login
-          </button>
+          <div>
+            <button
+              type="button"
+              onClick={() => setFormState('LOGIN')}
+              className="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium"
+            >
+              Back to login
+            </button>
+          </div>
         )}
+      </div>
+      
+      <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+        <p className="text-center text-xs text-gray-500 dark:text-gray-400">
+          By continuing, you agree to Todo Master's <a href="#" className="underline hover:text-gray-700 dark:hover:text-gray-300">Terms of Service</a> and <a href="#" className="underline hover:text-gray-700 dark:hover:text-gray-300">Privacy Policy</a>.
+        </p>
       </div>
     </div>
   );

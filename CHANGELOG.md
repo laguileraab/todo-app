@@ -5,11 +5,16 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- Interactive Changelog modal to view release history
+- Changelog access from main navigation and footer
+- Netlify serverless function to parse and serve changelog data
 - Organized database scripts into dedicated `db/scripts` folder
 - Created comprehensive database setup script (`create-database.sql`) that performs all setup in one operation
 - Created documentation for database scripts in `db/scripts/README.md`
 - Performance optimizations with memoization throughout the application
 - Added Excel export functionality for todos list
+- Added automatic login redirect to dashboard after successful authentication
+- Implemented auto-login functionality after user signup
 
 ### Changed
 - Updated setup-db.js to use a single consolidated SQL script
@@ -21,8 +26,13 @@ All notable changes to this project will be documented in this file.
 - Enhanced drag handle visualization with better styling and permanent visibility
 - Improved cursor feedback with proper grab/grabbing states following UI/UX best practices
 - Simplified database scripts by removing redundant files and using a single comprehensive script
+- Improved authentication UX with automatic redirect to dashboard after login/signup
 
 ### Fixed
+- Implemented fully functional mobile menu with toggle functionality
+- Added proper mobile menu navigation with auto-close on selection
+- Added theme toggle in mobile menu for better accessibility
+- Fixed authentication workflow by automatically redirecting to dashboard after login
 - Added solution for "column todos.position does not exist" error
 - Fixed drag and drop reordering error by including all required fields during position updates
 - Reduced unnecessary re-renders throughout the application

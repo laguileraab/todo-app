@@ -2,7 +2,12 @@ import { useState, useEffect } from 'react';
 import { cn } from '../utils/cn';
 import AuthForm from './AuthForm';
 
-export default function Auth() {
+interface AuthProps {
+  onLoginSuccess?: () => void;
+  onSignupSuccess?: () => void;
+}
+
+export default function Auth({ onLoginSuccess, onSignupSuccess }: AuthProps) {
   const [loading, setLoading] = useState(true);
   const [apiStatus, setApiStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [apiError, setApiError] = useState<string | null>(null);
@@ -60,29 +65,37 @@ export default function Auth() {
   return (
     <div className={cn(
       "flex flex-col items-center justify-center",
-      "p-6 bg-white dark:bg-gray-800",
-      "rounded-lg shadow-md",
-      "w-full max-w-md mx-auto"
+      "p-8 bg-white dark:bg-gray-800",
+      "rounded-xl shadow-xl",
+      "w-full max-w-md mx-auto transition-all"
     )}>
-      <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
-        Welcome to Todo App
-      </h1>
+      <div className="w-full mb-8 text-center">
+        <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white">
+          Welcome Back
+        </h1>
+        <p className="text-gray-600 dark:text-gray-300">
+          Sign in to access your tasks and stay productive
+        </p>
+      </div>
       
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-8">
-          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="flex flex-col items-center justify-center py-8 w-full">
+          <div className="w-10 h-10 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
           <p className="mt-4 text-gray-600 dark:text-gray-400">Testing API connection...</p>
         </div>
       ) : apiStatus === 'error' ? (
         <div className="w-full mb-6">
-          <div className="bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 p-4 rounded-md">
+          <div className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-200 p-4 rounded-md">
             <h3 className="font-bold">API Connection Error</h3>
             <p className="text-sm">{apiError}</p>
             <p className="mt-2 text-sm">Please check your Supabase configuration in the environment variables.</p>
           </div>
         </div>
       ) : (
-        <AuthForm />
+        <AuthForm 
+          onLoginSuccess={onLoginSuccess}
+          onSignupSuccess={onSignupSuccess}
+        />
       )}
     </div>
   );
