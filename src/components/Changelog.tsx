@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, memo } from 'react';
-import { cn } from '../utils/cn';
 import { parseChangelog, fallbackData, Release } from '../utils/parseChangelog';
 import changelogContent from '../../CHANGELOG.md?raw';
 
