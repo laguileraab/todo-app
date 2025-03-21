@@ -229,40 +229,44 @@ const Navigation = ({ setActivePage, onShowChangelog }: NavigationProps) => {
         <div className={cn(
           "h-full w-full",
           "pt-2 pb-3 space-y-1",
-          "bg-gradient-to-r from-primary-500/95 to-purple-600/95",
-          "dark:from-primary-900/95 dark:to-purple-900/95",
+          isScrolled
+            ? "bg-gradient-to-r from-primary-500/95 to-purple-600/95 dark:from-primary-900/95 dark:to-purple-900/95"
+            : "bg-white dark:bg-gray-900",
           "backdrop-blur-sm shadow-lg"
         )}>
           <div className="px-4 space-y-1">
-            <NavLink href="#features" onClick={() => handleNavLinkClick('features')} isScrolled={true}>
+            <div className="flex items-center justify-center py-2">
+              <ThemeToggle />
+            </div>
+            <NavLink href="#features" onClick={() => handleNavLinkClick('features')} isScrolled={isScrolled}>
               Features
             </NavLink>
-            <NavLink href="#pricing" onClick={() => handleNavLinkClick('pricing')} isScrolled={true}>
+            <NavLink href="#pricing" onClick={() => handleNavLinkClick('pricing')} isScrolled={isScrolled}>
               Pricing
             </NavLink>
-            <NavLink href="#about" onClick={() => handleNavLinkClick('about')} isScrolled={true}>
+            <NavLink href="#about" onClick={() => handleNavLinkClick('about')} isScrolled={isScrolled}>
               About Us
             </NavLink>
             <NavLink href="#changelog" onClick={() => {
               onShowChangelog();
               setMobileMenuOpen(false);
-            }} isScrolled={true}>
+            }} isScrolled={isScrolled}>
               Changelog
             </NavLink>
             {user ? (
               <>
-                <NavLink href="#todos" onClick={() => handleNavLinkClick('todos')} isScrolled={true}>
+                <NavLink href="#todos" onClick={() => handleNavLinkClick('todos')} isScrolled={isScrolled}>
                   My Todos
                 </NavLink>
-                <NavLink href="#profile" onClick={() => handleNavLinkClick('profile')} isScrolled={true}>
+                <NavLink href="#profile" onClick={() => handleNavLinkClick('profile')} isScrolled={isScrolled}>
                   Profile
                 </NavLink>
-                <NavLink href="#" onClick={handleSignOut} isButton isScrolled={true}>
+                <NavLink href="#" onClick={handleSignOut} isButton isScrolled={isScrolled}>
                   Sign Out
                 </NavLink>
               </>
             ) : (
-              <NavLink href="#auth" onClick={() => handleNavLinkClick('auth')} isButton isScrolled={true}>
+              <NavLink href="#auth" onClick={() => handleNavLinkClick('auth')} isButton isScrolled={isScrolled}>
                 Sign In
               </NavLink>
             )}

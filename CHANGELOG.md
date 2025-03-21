@@ -34,6 +34,9 @@ All notable changes to this project will be documented in this file.
 - Fixed sign out button visibility in light mode with proper contrast
 - Improved mobile menu with full-screen overlay and better spacing
 - Enhanced dark mode support across all navigation elements
+- Fixed mobile menu background in light theme with proper contrast
+- Added theme toggle to mobile menu for better accessibility
+- Improved mobile menu responsiveness in both light and dark modes
 
 ### Fixed
 - Implemented fully functional mobile menu with toggle functionality
