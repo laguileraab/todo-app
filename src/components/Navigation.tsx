@@ -17,10 +17,12 @@ const NavLink = memo(({ href, children, isButton, onClick }: NavLinkProps) => (
     href={href}
     onClick={onClick}
     className={cn(
-      "px-3 py-2 rounded-md text-sm font-medium transition-colors",
+      "px-3 py-2 rounded-md text-sm font-medium",
+      "transition-all duration-300 ease-in-out",
+      "transform hover:scale-105",
       isButton
-        ? "bg-primary-500 text-white hover:bg-primary-600"
-        : "text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+        ? "bg-primary-500 text-white hover:bg-primary-600 hover:shadow-lg"
+        : "text-gray-700 dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400 hover:bg-gray-100/10"
     )}
   >
     {children}
@@ -107,9 +109,10 @@ const Navigation = ({ setActivePage, onShowChangelog }: NavigationProps) => {
   return (
     <nav
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+        "fixed top-0 left-0 right-0 z-50",
+        "transition-all duration-300 ease-in-out",
         isScrolled
-          ? "bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm shadow-sm"
+          ? "bg-gradient-to-r from-primary-500/95 to-purple-600/95 dark:from-primary-900/95 dark:to-purple-900/95 backdrop-blur-sm shadow-lg"
           : "bg-transparent"
       )}
     >
@@ -117,7 +120,15 @@ const Navigation = ({ setActivePage, onShowChangelog }: NavigationProps) => {
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <a href="/" className="text-xl font-bold text-gray-900 dark:text-white">
+              <a 
+                href="/" 
+                className={cn(
+                  "text-xl font-bold",
+                  "transition-all duration-300 ease-in-out",
+                  "hover:scale-105 transform",
+                  isScrolled ? "text-white" : "text-gray-900 dark:text-white"
+                )}
+              >
                 Todo Master
               </a>
             </div>
@@ -137,7 +148,9 @@ const Navigation = ({ setActivePage, onShowChangelog }: NavigationProps) => {
             </div>
           </div>
           <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-4">
-            <ThemeToggle />
+            <div className="transition-transform duration-300 ease-in-out hover:scale-105">
+              <ThemeToggle />
+            </div>
             {user ? (
               <>
                 <NavLink href="#todos" onClick={() => handleNavLinkClick('todos')}>
@@ -159,7 +172,14 @@ const Navigation = ({ setActivePage, onShowChangelog }: NavigationProps) => {
           <div className="flex items-center sm:hidden">
             <button
               onClick={toggleMobileMenu}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none"
+              className={cn(
+                "inline-flex items-center justify-center p-2 rounded-md",
+                "transition-all duration-300 ease-in-out",
+                "hover:scale-105 transform",
+                isScrolled 
+                  ? "text-white hover:bg-white/10" 
+                  : "text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+              )}
             >
               <span className="sr-only">Open main menu</span>
               <MobileMenuIcon isOpen={mobileMenuOpen} />
@@ -171,11 +191,19 @@ const Navigation = ({ setActivePage, onShowChangelog }: NavigationProps) => {
       {/* Mobile menu */}
       <div
         className={cn(
-          "sm:hidden transition-all duration-300",
-          mobileMenuOpen ? "block" : "hidden"
+          "sm:hidden",
+          "transition-all duration-300 ease-in-out transform",
+          mobileMenuOpen 
+            ? "translate-y-0 opacity-100" 
+            : "-translate-y-full opacity-0 pointer-events-none"
         )}
       >
-        <div className="pt-2 pb-3 space-y-1 bg-white dark:bg-gray-900">
+        <div className={cn(
+          "pt-2 pb-3 space-y-1",
+          "bg-gradient-to-r from-primary-500/95 to-purple-600/95",
+          "dark:from-primary-900/95 dark:to-purple-900/95",
+          "backdrop-blur-sm shadow-lg"
+        )}>
           <NavLink href="#features" onClick={() => handleNavLinkClick('features')}>
             Features
           </NavLink>
