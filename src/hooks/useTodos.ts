@@ -324,12 +324,11 @@ export function useTodos() {
       setTodos(newOrder);
       
       // Prepare updates for each todo's position
-      // We only need to update the minimum required fields
       const updates = newOrder.map((todo, index) => ({
         id: todo.id,
         user_id: user.id,
-        text: todo.text,          // Include the required text field
-        completed: todo.completed, // Include the completed status
+        text: todo.text,
+        completed: todo.completed,
         position: index,
       }));
       

@@ -1,10 +1,87 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import TaskCard from './TaskCard';
 import { cn } from '../utils/cn';
 import { useTodos } from '../hooks/useTodos';
 import { useAuth } from '../context/AuthContext';
 import { DndContext, DragEndEvent, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+
+// Memoize the footer component
+const TodoFooter = memo(({ 
+  completedCount, 
+  totalCount, 
+  handleClearCompleted, 
+  user, 
+  realtimeStatus,
+  todosLength,
+  exportToExcel
+}: {
+  completedCount: number;
+  totalCount: number;
+  handleClearCompleted: () => void;
+  user: any;
+  realtimeStatus: string | null;
+  todosLength: number;
+  exportToExcel: () => void;
+}) => (
+  <footer className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+    <div className="flex justify-between items-center">
+      <p className={cn(
+        "text-xs transition-colors",
+        "text-gray-500 dark:text-gray-400"
+      )}>
+        {completedCount} of {totalCount} tasks completed
+      </p>
+      
+      <div className="flex gap-2">
+        {completedCount > 0 && (
+          <button 
+            onClick={handleClearCompleted}
+            className={cn(
+              "text-xs px-2 py-1 rounded transition-colors",
+              "bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800",
+              "text-red-700 dark:text-red-300"
+            )}
+            aria-label="Clear completed tasks"
+          >
+            Clear completed
+          </button>
+        )}
+        
+        {todosLength > 0 && (
+          <button 
+            onClick={exportToExcel}
+            className={cn(
+              "text-xs px-2 py-1 rounded transition-colors",
+              "bg-green-100 hover:bg-green-200 dark:bg-green-900 dark:hover:bg-green-800",
+              "text-green-700 dark:text-green-300",
+              "flex items-center gap-1"
+            )}
+            aria-label="Export to Excel"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            Export Excel
+          </button>
+        )}
+      </div>
+    </div>
+    
+    {user && (
+      <p className={cn(
+        "text-xs mt-1 transition-colors",
+        realtimeStatus === 'SUBSCRIBED' 
+          ? "text-green-500 dark:text-green-400" 
+          : "text-orange-500 dark:text-orange-400"
+      )}>
+        {realtimeStatus === 'SUBSCRIBED' 
+          ? "✓ Real-time updates active" 
+          : "⚠ Real-time updates inactive"}
+      </p>
+    )}
+  </footer>
+));
 
 export default function TodoList() {
   const { user } = useAuth();
@@ -241,65 +318,6 @@ export default function TodoList() {
     </ul>
   ), [todos, emptyState, handleToggleComplete, handleDeleteTodo, handleEditTodo]);
 
-  // Memoize the footer component
-  const footer = useMemo(() => (
-    <footer className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-      <div className="flex justify-between items-center">
-        <p className={cn(
-          "text-xs transition-colors",
-          "text-gray-500 dark:text-gray-400"
-        )}>
-          {completedCount} of {totalCount} tasks completed
-        </p>
-        
-        <div className="flex gap-2">
-          {completedCount > 0 && (
-            <button 
-              onClick={handleClearCompleted}
-              className={cn(
-                "text-xs px-2 py-1 rounded transition-colors",
-                "bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800",
-                "text-red-700 dark:text-red-300"
-              )}
-            >
-              Clear completed
-            </button>
-          )}
-          
-          {todos.length > 0 && (
-            <button 
-              onClick={exportToExcel}
-              className={cn(
-                "text-xs px-2 py-1 rounded transition-colors",
-                "bg-green-100 hover:bg-green-200 dark:bg-green-900 dark:hover:bg-green-800",
-                "text-green-700 dark:text-green-300",
-                "flex items-center gap-1"
-              )}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              Export Excel
-            </button>
-          )}
-        </div>
-      </div>
-      
-      {user && (
-        <p className={cn(
-          "text-xs mt-1 transition-colors",
-          realtimeStatus === 'SUBSCRIBED' 
-            ? "text-green-500 dark:text-green-400" 
-            : "text-orange-500 dark:text-orange-400"
-        )}>
-          {realtimeStatus === 'SUBSCRIBED' 
-            ? "✓ Real-time updates active" 
-            : "⚠ Real-time updates inactive"}
-        </p>
-      )}
-    </footer>
-  ), [completedCount, totalCount, handleClearCompleted, user, realtimeStatus, todos.length, exportToExcel]);
-
   return (
     <div className={cn(
       "rounded-lg shadow-md p-6 w-full max-w-md transition-colors",
@@ -362,7 +380,15 @@ export default function TodoList() {
         </DndContext>
       )}
       
-      {!isLoading && todos.length > 0 && footer}
+      <TodoFooter 
+        completedCount={completedCount}
+        totalCount={totalCount}
+        handleClearCompleted={handleClearCompleted}
+        user={user}
+        realtimeStatus={realtimeStatus}
+        todosLength={todos.length}
+        exportToExcel={exportToExcel}
+      />
     </div>
   );
 } 

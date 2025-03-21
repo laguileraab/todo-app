@@ -5,6 +5,7 @@ import Changelog from './Changelog';
 interface LandingPageProps {
   setActivePage: (page: string) => void;
   activePage: string;
+  onShowChangelog: () => void;
 }
 
 // Hero section
@@ -441,7 +442,7 @@ const Footer = ({ onShowChangelog }: FooterProps) => {
   );
 };
 
-const LandingPage = ({ setActivePage, activePage }: LandingPageProps) => {
+const LandingPage = ({ setActivePage, activePage, onShowChangelog }: LandingPageProps) => {
   const [showChangelog, setShowChangelog] = useState(false);
   
   // Based on activePage, we'll scroll to the appropriate section

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, memo } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
@@ -9,6 +9,7 @@ import LandingPage from './components/LandingPage'
 import { cn } from './utils/cn'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { UserProfile } from './components/UserProfile'
+import Changelog from './components/Changelog'
 
 interface LogoLinkProps {
   href: string;
@@ -18,27 +19,32 @@ interface LogoLinkProps {
   isReactLogo?: boolean;
 }
 
-function LogoLink({
-  href,
-  imgSrc,
-  altText,
-  className,
-  isReactLogo = false
-}: LogoLinkProps) {
-  return (
-    <a href={href} target="_blank" rel="noopener noreferrer">
-      <img 
-        src={imgSrc} 
-        className={cn(
-          "h-16 p-1 transition-transform duration-300", 
-          isReactLogo && "animate-spin-slow",
-          className
-        )} 
-        alt={altText} 
-      />
-    </a>
-  )
-}
+// Memoize LogoLink component
+const LogoLink = memo(({ href, imgSrc, altText, className, isReactLogo }: LogoLinkProps) => (
+  <a
+    href={href}
+    className={cn(
+      "p-6",
+      "rounded-xl",
+      "bg-white dark:bg-gray-800",
+      "shadow-lg hover:shadow-xl",
+      "transition-all duration-300",
+      "hover:scale-105",
+      className
+    )}
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <img
+      src={imgSrc}
+      alt={altText}
+      className={cn(
+        "h-24 w-auto",
+        isReactLogo ? "animate-spin-slow" : "hover:drop-shadow-xl transition-all duration-300"
+      )}
+    />
+  </a>
+));
 
 function Dashboard() {
   const { user } = useAuth();
@@ -116,9 +122,19 @@ function Dashboard() {
   )
 }
 
-function AppContent() {
+// Memoize AppContent component
+const AppContent = memo(() => {
   const { user, loading } = useAuth();
   const [activePage, setActivePage] = useState('home');
+  const [showChangelog, setShowChangelog] = useState(false);
+
+  const handleCloseChangelog = useCallback(() => {
+    setShowChangelog(false);
+  }, []);
+
+  const handleShowChangelog = useCallback(() => {
+    setShowChangelog(true);
+  }, []);
 
   // Helper function to determine which page to show
   const getPageContent = () => {
@@ -159,26 +175,27 @@ function AppContent() {
   }, [user, activePage]);
 
   return (
-    <div className="min-h-screen">
-      <Navigation setActivePage={setActivePage} />
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <Navigation setActivePage={setActivePage} onShowChangelog={handleShowChangelog} />
       
-      {loading ? (
-        <div className="min-h-screen flex justify-center items-center pt-20 bg-white dark:bg-gray-900">
-          <div className="animate-spin h-12 w-12 border-4 border-primary-500 rounded-full border-t-transparent"></div>
-        </div>
-      ) : (
-        getPageContent()
-      )}
+      <main className="container mx-auto px-4 py-8">
+        {activePage === 'landing' && <LandingPage onShowChangelog={handleShowChangelog} />}
+        {activePage === 'todos' && <TodoList />}
+        {activePage === 'profile' && <UserProfile />}
+      </main>
+
+      <Changelog isOpen={showChangelog} onClose={handleCloseChangelog} />
     </div>
   );
-}
+});
 
-function App() {
+// Memoize App component
+const App = memo(() => {
   return (
     <AuthProvider>
       <AppContent />
     </AuthProvider>
-  )
-}
+  );
+});
 
-export default App
+export default App;

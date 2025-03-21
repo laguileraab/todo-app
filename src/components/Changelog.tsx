@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import { cn } from '../utils/cn';
 import { parseChangelog, fallbackData, Release } from '../utils/parseChangelog';
 import changelogContent from '../../CHANGELOG.md?raw';
@@ -8,24 +8,112 @@ interface ChangelogProps {
   isOpen: boolean;
 }
 
+// Memoized release item component to prevent unnecessary re-renders
+const ReleaseItem = memo(({ 
+  release, 
+  isExpanded, 
+  onToggle 
+}: { 
+  release: Release; 
+  isExpanded: boolean; 
+  onToggle: () => void;
+}) => (
+  <div className="border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden">
+    <button
+      onClick={onToggle}
+      className="w-full px-4 py-3 flex items-center justify-between bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+    >
+      <div className="flex items-center space-x-3">
+        <span className="text-lg font-semibold text-gray-900 dark:text-white">
+          {release.version}
+        </span>
+        {release.date && (
+          <span className="text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+            {release.date}
+          </span>
+        )}
+      </div>
+      <svg
+        className={`w-5 h-5 text-gray-500 dark:text-gray-400 transform transition-transform ${
+          isExpanded ? 'rotate-180' : ''
+        }`}
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+      </svg>
+    </button>
+    {isExpanded && (
+      <div className="px-4 py-3 bg-white dark:bg-gray-900">
+        {release.changes.added && release.changes.added.length > 0 && (
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold text-green-600 dark:text-green-400 mb-2">Added</h3>
+            <ul className="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+              {release.changes.added.map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {release.changes.changed && release.changes.changed.length > 0 && (
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold text-blue-600 dark:text-blue-400 mb-2">Changed</h3>
+            <ul className="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+              {release.changes.changed.map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {release.changes.fixed && release.changes.fixed.length > 0 && (
+          <div>
+            <h3 className="text-sm font-semibold text-red-600 dark:text-red-400 mb-2">Fixed</h3>
+            <ul className="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+              {release.changes.fixed.map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    )}
+  </div>
+));
+
 export default function Changelog({ onClose, isOpen }: ChangelogProps) {
   const [releases, setReleases] = useState<Release[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [expandedReleases, setExpandedReleases] = useState<Record<string, boolean>>({});
+  const [expandedReleases, setExpandedReleases] = useState<string[]>([]);
+
+  // Memoize the toggle function to prevent unnecessary re-renders
+  const toggleRelease = useCallback((version: string) => {
+    setExpandedReleases(prev => 
+      prev.includes(version) 
+        ? prev.filter(v => v !== version)
+        : [...prev, version]
+    );
+  }, []);
 
   useEffect(() => {
-    try {
-      // Parse the actual CHANGELOG.md file
-      const parsedReleases = parseChangelog(changelogContent);
-      
-      // Simulate a loading delay for better UX
-      const timeout = setTimeout(() => {
+    let mounted = true;
+
+    const loadChangelog = async () => {
+      try {
+        // Parse the actual CHANGELOG.md file
+        const parsedReleases = parseChangelog(changelogContent);
+        
+        // Simulate a loading delay for better UX
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        if (!mounted) return;
+
         if (parsedReleases.length > 0) {
           setReleases(parsedReleases);
           // Expand the first release by default
           if (parsedReleases.length > 0) {
-            setExpandedReleases({ [parsedReleases[0].version]: true });
+            setExpandedReleases([parsedReleases[0].version]);
           }
         } else {
           // If parsing produced no releases, use fallback data
@@ -33,160 +121,74 @@ export default function Changelog({ onClose, isOpen }: ChangelogProps) {
           setReleases(fallbackData);
           // Expand the first fallback release by default
           if (fallbackData.length > 0) {
-            setExpandedReleases({ [fallbackData[0].version]: true });
+            setExpandedReleases([fallbackData[0].version]);
           }
         }
         setLoading(false);
-      }, 500);
-      
-      return () => clearTimeout(timeout);
-    } catch (err) {
-      console.error('Error parsing changelog:', err);
-      setError('Failed to parse changelog. Please try again later.');
-      setReleases(fallbackData);
-      setLoading(false);
-    }
-  }, []);
+      } catch (err) {
+        console.error('Error parsing changelog:', err);
+        if (mounted) {
+          setError('Failed to parse changelog. Please try again later.');
+          setReleases(fallbackData);
+          setLoading(false);
+        }
+      }
+    };
 
-  const toggleRelease = (version: string) => {
-    setExpandedReleases(prev => ({
-      ...prev,
-      [version]: !prev[version]
-    }));
-  };
+    loadChangelog();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   if (!isOpen) return null;
 
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm dark:backdrop-blur-sm"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-      style={{
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      }}
-    >
-      <div className={cn(
-        "bg-white/95 dark:bg-gray-800/95 rounded-xl shadow-xl",
-        "w-full max-w-3xl max-h-[85vh] overflow-hidden flex flex-col",
-        "border border-gray-200 dark:border-gray-700",
-        "backdrop-filter backdrop-blur-sm"
-      )}>
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Release History</h2>
-          <button 
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm dark:bg-black/70 dark:backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Release Notes</h2>
+          <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-gray-100/80 dark:hover:bg-gray-700/80 text-gray-500 dark:text-gray-400"
-            aria-label="Close changelog"
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
-        
-        <div className="overflow-y-auto p-4 max-h-[65vh]">
+        <div className="flex-1 overflow-y-auto p-6">
           {loading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin h-10 w-10 border-4 border-primary-500 rounded-full border-t-transparent"></div>
+            <div className="flex items-center justify-center h-32">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-white"></div>
             </div>
           ) : error ? (
-            <div className="bg-red-100/80 dark:bg-red-900/30 text-red-700 dark:text-red-200 p-4 rounded-md">
-              {error}
+            <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 rounded-lg">
+              <p className="font-medium">{error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="mt-2 text-sm text-red-600 dark:text-red-400 hover:underline"
+              >
+                Try again
+              </button>
             </div>
           ) : releases.length === 0 ? (
-            <div className="bg-yellow-100/80 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-200 p-4 rounded-md">
+            <div className="text-center p-4 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 rounded-lg">
               No release history available.
             </div>
           ) : (
-            <div className="space-y-4">
-              {releases.map((release, index) => (
-                <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-                  <button 
-                    className="w-full p-4 flex items-center justify-between bg-gray-50/80 dark:bg-gray-900/80 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 transition-colors"
-                    onClick={() => toggleRelease(release.version)}
-                    aria-expanded={expandedReleases[release.version]}
-                  >
-                    <div className="flex items-center gap-3">
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                        v{release.version}
-                      </h3>
-                      {release.date && (
-                        <span className="text-sm px-2 py-1 bg-gray-200/80 dark:bg-gray-700/80 text-gray-700 dark:text-gray-300 rounded">
-                          {release.date}
-                        </span>
-                      )}
-                    </div>
-                    <svg 
-                      xmlns="http://www.w3.org/2000/svg" 
-                      className={cn(
-                        "h-5 w-5 text-gray-500 dark:text-gray-400 transition-transform",
-                        expandedReleases[release.version] ? "transform rotate-180" : ""
-                      )}
-                      fill="none" 
-                      viewBox="0 0 24 24" 
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                  
-                  {expandedReleases[release.version] && (
-                    <div className="p-4 bg-white/90 dark:bg-gray-850/90">
-                      {release.changes.added && release.changes.added.length > 0 && (
-                        <div className="mb-4">
-                          <h4 className="text-sm font-semibold text-green-600 dark:text-green-400 mb-2">
-                            Added
-                          </h4>
-                          <ul className="space-y-1 pl-5 list-disc text-gray-700 dark:text-gray-300">
-                            {release.changes.added.map((item, i) => (
-                              <li key={i}>{item}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      
-                      {release.changes.changed && release.changes.changed.length > 0 && (
-                        <div className="mb-4">
-                          <h4 className="text-sm font-semibold text-blue-600 dark:text-blue-400 mb-2">
-                            Changed
-                          </h4>
-                          <ul className="space-y-1 pl-5 list-disc text-gray-700 dark:text-gray-300">
-                            {release.changes.changed.map((item, i) => (
-                              <li key={i}>{item}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      
-                      {release.changes.fixed && release.changes.fixed.length > 0 && (
-                        <div>
-                          <h4 className="text-sm font-semibold text-amber-600 dark:text-amber-400 mb-2">
-                            Fixed
-                          </h4>
-                          <ul className="space-y-1 pl-5 list-disc text-gray-700 dark:text-gray-300">
-                            {release.changes.fixed.map((item, i) => (
-                              <li key={i}>{item}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
+            <div className="space-y-6">
+              {releases.map((release) => (
+                <ReleaseItem
+                  key={release.version}
+                  release={release}
+                  isExpanded={expandedReleases.includes(release.version)}
+                  onToggle={() => toggleRelease(release.version)}
+                />
               ))}
             </div>
           )}
-        </div>
-        
-        <div className="border-t border-gray-200 dark:border-gray-700 p-4 text-right">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 bg-gray-200/80 dark:bg-gray-700/80 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300/80 dark:hover:bg-gray-600/80 transition-colors"
-          >
-            Close
-          </button>
         </div>
       </div>
     </div>
