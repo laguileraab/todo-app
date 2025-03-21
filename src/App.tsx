@@ -161,7 +161,7 @@ const AppContent = memo(() => {
     }
     
     // Show landing page for all other cases
-    return <LandingPage setActivePage={setActivePage} activePage={activePage} />;
+    return <LandingPage setActivePage={setActivePage} activePage={activePage} onShowChangelog={handleShowChangelog} />;
   };
 
   // React to auth state changes
@@ -179,9 +179,7 @@ const AppContent = memo(() => {
       <Navigation setActivePage={setActivePage} onShowChangelog={handleShowChangelog} />
       
       <main className="container mx-auto px-4 py-8">
-        {activePage === 'landing' && <LandingPage onShowChangelog={handleShowChangelog} />}
-        {activePage === 'todos' && <TodoList />}
-        {activePage === 'profile' && <UserProfile />}
+        {getPageContent()}
       </main>
 
       <Changelog isOpen={showChangelog} onClose={handleCloseChangelog} />
