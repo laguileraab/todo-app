@@ -21,9 +21,11 @@ const NavLink = memo(({ href, children, isButton, onClick, isScrolled = false }:
       onClick?.();
     }}
     className={cn(
-      "px-4 py-2 rounded-md text-sm font-medium",
+      "px-4 py-3 rounded-lg text-base font-medium",
       "transition-all duration-300 ease-in-out",
-      "transform hover:scale-105 active:scale-95",
+      "flex items-center",
+      "hover:translate-x-1 active:translate-x-0",
+      "block w-full text-left",
       isButton
         ? cn(
             isScrolled 
@@ -41,8 +43,8 @@ const NavLink = memo(({ href, children, isButton, onClick, isScrolled = false }:
               : cn(
                   "text-gray-800 dark:text-gray-200",
                   "hover:text-primary-600 dark:hover:text-primary-400",
-                  "hover:bg-gray-100 dark:hover:bg-gray-800/50",
-                  "active:bg-gray-200 dark:active:bg-gray-700/50"
+                  "hover:bg-gray-100/80 dark:hover:bg-gray-800/50",
+                  "active:bg-gray-200/80 dark:active:bg-gray-700/50"
                 )
           )
     )}
@@ -180,6 +182,9 @@ const Navigation = ({ setActivePage, onShowChangelog }: NavigationProps) => {
             </div>
             {user ? (
               <>
+                <NavLink href="#appointments" onClick={() => handleNavLinkClick('appointments')} isScrolled={isScrolled}>
+                  Appointments
+                </NavLink>
                 <NavLink href="#todos" onClick={() => handleNavLinkClick('todos')} isScrolled={isScrolled}>
                   My Todos
                 </NavLink>
@@ -200,15 +205,18 @@ const Navigation = ({ setActivePage, onShowChangelog }: NavigationProps) => {
             <button
               onClick={toggleMobileMenu}
               className={cn(
-                "inline-flex items-center justify-center p-2 rounded-md",
-                "transition-all duration-300 ease-in-out",
-                "hover:scale-105 transform",
+                "inline-flex items-center justify-center p-2.5 rounded-lg",
+                "transition-colors duration-300 ease-in-out",
+                "hover:bg-opacity-80 active:bg-opacity-90",
+                "focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2",
+                "relative z-50",
                 isScrolled 
                   ? "text-white hover:bg-white/10" 
-                  : "text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  : "text-gray-700 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800"
               )}
+              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
             >
-              <span className="sr-only">Open main menu</span>
+              <span className="sr-only">{mobileMenuOpen ? "Close menu" : "Open menu"}</span>
               <MobileMenuIcon isOpen={mobileMenuOpen} />
             </button>
           </div>
@@ -219,57 +227,78 @@ const Navigation = ({ setActivePage, onShowChangelog }: NavigationProps) => {
       <div
         className={cn(
           "sm:hidden",
-          "transition-all duration-300 ease-in-out transform",
-          "fixed inset-0 top-16",
+          "fixed inset-0",
+          "z-40",
+          "transition-opacity duration-300 ease-in-out",
           mobileMenuOpen 
-            ? "translate-y-0 opacity-100" 
-            : "-translate-y-full opacity-0 pointer-events-none"
+            ? "opacity-100" 
+            : "opacity-0 pointer-events-none"
         )}
       >
-        <div className={cn(
-          "h-full w-full",
-          "pt-2 pb-3 space-y-1",
-          isScrolled
-            ? "bg-gradient-to-r from-primary-500/95 to-purple-600/95 dark:from-primary-900/95 dark:to-purple-900/95"
-            : "bg-white dark:bg-gray-900",
-          "backdrop-blur-sm shadow-lg"
-        )}>
-          <div className="px-4 space-y-1">
-            <div className="flex items-center justify-center py-2">
+        {/* Backdrop overlay */}
+        <div 
+          className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+          onClick={toggleMobileMenu}
+        />
+        
+        {/* Menu panel */}
+        <div 
+          className={cn(
+            "absolute top-16 right-0 h-[calc(100vh-4rem)] w-3/4 max-w-sm",
+            "transition-transform duration-300 ease-in-out",
+            "shadow-xl",
+            "overflow-y-auto",
+            isScrolled
+              ? "bg-gradient-to-r from-primary-500 to-purple-600 dark:from-primary-900 dark:to-purple-900"
+              : "bg-white dark:bg-gray-900",
+            mobileMenuOpen 
+              ? "translate-x-0" 
+              : "translate-x-full"
+          )}
+        >
+          <div className="px-4 py-6 space-y-6">
+            <div className="flex items-center justify-center mb-6">
               <ThemeToggle />
             </div>
-            <NavLink href="#features" onClick={() => handleNavLinkClick('features')} isScrolled={isScrolled}>
-              Features
-            </NavLink>
-            <NavLink href="#pricing" onClick={() => handleNavLinkClick('pricing')} isScrolled={isScrolled}>
-              Pricing
-            </NavLink>
-            <NavLink href="#about" onClick={() => handleNavLinkClick('about')} isScrolled={isScrolled}>
-              About Us
-            </NavLink>
-            <NavLink href="#changelog" onClick={() => {
-              onShowChangelog();
-              setMobileMenuOpen(false);
-            }} isScrolled={isScrolled}>
-              Changelog
-            </NavLink>
-            {user ? (
-              <>
-                <NavLink href="#todos" onClick={() => handleNavLinkClick('todos')} isScrolled={isScrolled}>
-                  My Todos
-                </NavLink>
-                <NavLink href="#profile" onClick={() => handleNavLinkClick('profile')} isScrolled={isScrolled}>
-                  Profile
-                </NavLink>
-                <NavLink href="#" onClick={handleSignOut} isButton isScrolled={isScrolled}>
-                  Sign Out
-                </NavLink>
-              </>
-            ) : (
-              <NavLink href="#auth" onClick={() => handleNavLinkClick('auth')} isButton isScrolled={isScrolled}>
-                Sign In
+            <div className="space-y-3">
+              <NavLink href="#features" onClick={() => handleNavLinkClick('features')} isScrolled={isScrolled}>
+                Features
               </NavLink>
-            )}
+              <NavLink href="#pricing" onClick={() => handleNavLinkClick('pricing')} isScrolled={isScrolled}>
+                Pricing
+              </NavLink>
+              <NavLink href="#about" onClick={() => handleNavLinkClick('about')} isScrolled={isScrolled}>
+                About Us
+              </NavLink>
+              <NavLink href="#changelog" onClick={() => {
+                onShowChangelog();
+                setMobileMenuOpen(false);
+              }} isScrolled={isScrolled}>
+                Changelog
+              </NavLink>
+            </div>
+            <div className="pt-4 mt-4 border-t border-gray-200/30 dark:border-gray-700/50 space-y-3">
+              {user ? (
+                <>
+                  <NavLink href="#appointments" onClick={() => handleNavLinkClick('appointments')} isScrolled={isScrolled}>
+                    Appointments
+                  </NavLink>
+                  <NavLink href="#todos" onClick={() => handleNavLinkClick('todos')} isScrolled={isScrolled}>
+                    My Todos
+                  </NavLink>
+                  <NavLink href="#profile" onClick={() => handleNavLinkClick('profile')} isScrolled={isScrolled}>
+                    Profile
+                  </NavLink>
+                  <NavLink href="#" onClick={handleSignOut} isButton isScrolled={isScrolled}>
+                    Sign Out
+                  </NavLink>
+                </>
+              ) : (
+                <NavLink href="#auth" onClick={() => handleNavLinkClick('auth')} isButton isScrolled={isScrolled}>
+                  Sign In
+                </NavLink>
+              )}
+            </div>
           </div>
         </div>
       </div>

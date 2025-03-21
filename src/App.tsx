@@ -10,6 +10,7 @@ import { cn } from './utils/cn'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { UserProfile } from './components/UserProfile'
 import Changelog from './components/Changelog'
+import CalendarPage from './pages/CalendarPage'
 
 interface LogoLinkProps {
   href: string;
@@ -143,8 +144,13 @@ const AppContent = memo(() => {
       return <Dashboard />;
     }
     
-    // If user is not logged in and tries to access dashboard/app
-    if (!user && (activePage === 'dashboard' || activePage === 'app')) {
+    // Calendar page for appointments
+    if (user && activePage === 'appointments') {
+      return <CalendarPage />;
+    }
+    
+    // If user is not logged in and tries to access dashboard/app or appointments
+    if (!user && (activePage === 'dashboard' || activePage === 'app' || activePage === 'appointments')) {
       setActivePage('login');
     }
     
