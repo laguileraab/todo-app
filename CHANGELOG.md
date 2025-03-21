@@ -31,6 +31,7 @@ All notable changes to this project will be documented in this file.
 - Added smooth transition animations for navigation button interactions
 - Fixed My Todos and Profile navigation functionality with proper URL hash updates
 - Enhanced button states and feedback in both light and dark modes
+- Fixed sign out button visibility in light mode when not scrolled by adjusting contrast
 
 ### Fixed
 - Implemented fully functional mobile menu with toggle functionality

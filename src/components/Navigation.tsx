@@ -26,8 +26,10 @@ const NavLink = memo(({ href, children, isButton, onClick, isScrolled = false }:
       "transform hover:scale-105 active:scale-95",
       isButton
         ? cn(
-            "bg-gradient-to-r from-primary-500 to-primary-600 dark:from-primary-600 dark:to-primary-700",
-            "text-white shadow-md",
+            isScrolled 
+              ? "bg-gradient-to-r from-primary-500 to-primary-600 dark:from-primary-600 dark:to-primary-700 text-white"
+              : "bg-gradient-to-r from-primary-600 to-primary-700 text-white dark:from-primary-500 dark:to-primary-600",
+            "shadow-md",
             "hover:shadow-lg hover:from-primary-600 hover:to-primary-700",
             "dark:hover:from-primary-500 dark:hover:to-primary-600",
             "border border-primary-400 dark:border-primary-500",
